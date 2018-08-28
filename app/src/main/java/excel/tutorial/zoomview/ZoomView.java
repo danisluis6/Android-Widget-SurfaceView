@@ -2,6 +2,7 @@ package excel.tutorial.zoomview;
 
 import android.content.Context;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.SurfaceView;
@@ -15,22 +16,23 @@ public class ZoomView extends SurfaceView {
         ZOOM
     }
 
-    private static final float MIN_ZOOM = 1.0f;
-    private static final float MAX_ZOOM = 5.0f;
-
     private Mode mode = Mode.NONE;
+
+    private static final float minScale = 1.0f;
+    private static final float maxScale = 5.0f;
+
     private float scale = 1.0f;
-    private float lastScaleFactor = 0f;
 
-    private float startX = 0f;
-    private float startY = 0f;
+    private float startX = 0.0f;
+    private float startY = 0.0f;
 
-    private float dx = 0f;
-    private float dy = 0f;
-    private float prevDx = 0f;
-    private float prevDy = 0f;
+    private float dx = 0.0f;
+    private float dy = 0.0f;
+    private float prevDx = 0.0f;
+    private float prevDy = 0.0f;
 
     private ScaleGestureDetector SGD;
+    private float lastScaleFactor = 1.0f;
 
     public ZoomView(Context context) {
         super(context);
@@ -62,7 +64,7 @@ public class ZoomView extends SurfaceView {
         public boolean onTouch(View view, MotionEvent motionEvent) {
             switch (motionEvent.getAction() & MotionEvent.ACTION_MASK) {
                 case MotionEvent.ACTION_DOWN:
-                    if (scale > MIN_ZOOM) {
+                    if (scale > minScale) {
                         mode = Mode.DRAG;
                         startX = motionEvent.getX() - prevDx;
                         startY = motionEvent.getY() - prevDy;
@@ -88,10 +90,10 @@ public class ZoomView extends SurfaceView {
             }
             SGD.onTouchEvent(motionEvent);
 
-            if ((mode == Mode.DRAG && scale >= MIN_ZOOM) || mode == Mode.ZOOM) {
+            if ((mode == Mode.DRAG && scale >= minScale) || mode == Mode.ZOOM) {
                 getParent().requestDisallowInterceptTouchEvent(true);
-                float maxDx = getWidth() * (scale - 1);
-                float maxDy = getHeight() * (scale - 1);
+                float maxDx = getWidth() * scale;
+                float maxDy = getHeight() * scale;
                 dx = Math.min(Math.max(dx, -maxDx), 0);
                 dy = Math.min(Math.max(dy, -maxDy), 0);
                 applyScaleAndTranslation();
@@ -108,13 +110,15 @@ public class ZoomView extends SurfaceView {
             if (lastScaleFactor == 0 || (Math.signum(scaleFactor) == Math.signum(lastScaleFactor))) {
                 float prevScale = scale;
                 scale *= scaleFactor;
-                scale = Math.max(MIN_ZOOM, Math.min(scale, MAX_ZOOM));
+                scale = Math.max(minScale, Math.min(scale, maxScale));
                 lastScaleFactor = scaleFactor;
                 float adjustedScaleFactor = scale / prevScale;
                 float focusX = scaleDetector.getFocusX();
                 float focusY = scaleDetector.getFocusY();
                 dx += (dx - focusX) * (adjustedScaleFactor - 1);
                 dy += (dy - focusY) * (adjustedScaleFactor - 1);
+                Log.i("TAG", "dx: "+dx);
+                Log.i("TAG", "dy: "+dy);
             } else {
                 lastScaleFactor = 0;
             }
