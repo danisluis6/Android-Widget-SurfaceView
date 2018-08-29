@@ -115,8 +115,8 @@ public class ZoomView extends SurfaceView {
                 float adjustedScaleFactor = scale / prevScale;
                 float focusX = scaleDetector.getFocusX();
                 float focusY = scaleDetector.getFocusY();
-                dx += (dx - focusX) * (adjustedScaleFactor - 1);
-                dy += (dy - focusY) * (adjustedScaleFactor - 1);
+                dx += (dx - focusX) * (adjustedScaleFactor - 1.0f);
+                dy += (dy - focusY) * (adjustedScaleFactor - 1.0f);
             } else {
                 lastScaleFactor = 0;
             }
